@@ -139,28 +139,39 @@ var ZONES = {
     ]
   },
 
-  kofferraum: {
-    label: "Koffer\u00adraum",
-    x: 72, y: 20, w: 22, h: 60,
-    items: [
-      "Warndreieck",
-      "Verbandskasten",
+  kofferraumLinks: {
+  label: "Koffer\u00adraum L",
+  x: 72, y: 5, w: 22, h: 25,
+  items: [
+    "Item 1",
+    { name: "Roter Koffer", sub: [
+      "Inhalt 1",
+      "Inhalt 2"
+    ]}
+  ]
+},
 
-      { name: "Roter Koffer", sub: [
-        "Inhalt 1 - hier eintragen",
-        "Inhalt 2 - hier eintragen",
-        "Inhalt 3 - hier eintragen"
-      ]},
+kofferraumMitte: {
+  label: "Koffer\u00adraum M",
+  x: 72, y: 33, w: 22, h: 34,
+  items: [
+    "Item 1",
+    { name: "Blauer Koffer", sub: [
+      "Inhalt 1",
+      "Inhalt 2"
+    ]}
+  ]
+},
 
-      { name: "Blauer Koffer", sub: [
-        "Inhalt 1 - hier eintragen",
-        "Inhalt 2 - hier eintragen"
-      ]},
+kofferraumRechts: {
+  label: "Koffer\u00adraum R",
+  x: 72, y: 70, w: 22, h: 25,
+  items: [
+    "Item 1",
+    "Item 2"
+  ]
+}
 
-      "Feuerlöscher",
-      "Warnweste"
-    ]
-  }
 
 };
 
