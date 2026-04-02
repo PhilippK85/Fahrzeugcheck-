@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FzCheck">
+<meta name="theme-color" content="#b91c1c">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Fahrzeugcheck</title>
+<style>
+:root{--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f5f5f4;color:#1c1917;font-family:-apple-system,'SF Pro Display',system-ui,sans-serif;padding:calc(12px + var(--st)) 8px calc(16px + var(--sb));max-width:600px;margin:0 auto;min-height:100vh;-webkit-text-size-adjust:100%}
+.hdr{text-align:center;margin-bottom:12px}
+.hdr h1{font-size:19px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.hdr p{font-size:11px;color:#78716c;margin-top:1px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tab{flex:1;padding:9px 2px;border-radius:12px;cursor:pointer;font-weight:700;font-size:14px;text-align:center;border:2.5px solid #d6d3d1;background:#fff;color:#57534e;-webkit-appearance:none;font-family:inherit}
+.tab.a{color:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.12)}
+.tp{font-size:10px;font-weight:500;opacity:0.8;margin-top:2px}
+.pr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pb{flex:1;height:7px;background:#e7e5e4;border-radius:4px;overflow:hidden}
+.pf{height:100%;border-radius:4px;transition:width 0.3s}
+.pt{font-size:12px;font-weight:700;min-width:48px;text-align:right}
+.rb{font-size:11px;padding:4px 10px;background:#f5f5f4;border:1.5px solid #d6d3d1;color:#78716c;border-radius:7px;cursor:pointer;font-weight:600;font-family:inherit;-webkit-appearance:none}
+.lbl{font-size:12px;font-weight:700;color:#78716c;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px 4px}
+/* Vehicle schematic */
+.vs{position:relative;width:100%;background:#fff;border-radius:14px;overflow:hidden;margin-bottom:4px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1.5px solid #e7e5e4}
+.vs svg{width:100%;display:block}
+/* Zone buttons on schematic */
+.zb{position:absolute;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px solid;-webkit-appearance:none;font-family:inherit;font-size:7px;font-weight:700;line-height:1.1;padding:1px;transition:all 0.15s;z-index:2}
+.zb:active{transform:scale(0.95)}
+/* Equipment grid below vehicle */
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.eb{padding:10px 6px;border-radius:12px;cursor:pointer;text-align:center;border:2px solid;-webkit-appearance:none;font-family:inherit;transition:all 0.15s;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.eb:active{transform:scale(0.97)}
+.en{font-size:11px;font-weight:700;line-height:1.2}
+.ec{font-size:9px;opacity:0.8;margin-top:2px}
+/* Panel */
+.pnl{background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);animation:fi 0.2s ease}
+.pnt{font-size:16px;font-weight:800;margin-bottom:10px}
+.ir{width:100%;display:flex;align-items:center;gap:7px;padding:9px 9px;background:#fafaf9;border:1.5px solid #e7e5e4;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;text-align:left;color:#1c1917;margin-bottom:4px;font-family:inherit;-webkit-appearance:none;transition:all 0.12s}
+.ir:active{transform:scale(0.98)}
+.ir.d{color:#16a34a}
+.ir.x{background:#fef2f2;border-color:#fca5a544}
+.cb{width:20px;height:20px;border-radius:5px;border:2px solid #d6d3d1;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0}
+.cb.d{border-color:#16a34a;background:#16a34a}
+.nm{flex:1;line-height:1.25}
+.nm.s{text-decoration:line-through;opacity:0.45}
+.aw{font-size:9px;color:#a8a29e;transition:transform 0.15s;display:inline-block}
+.aw.o{transform:rotate(90deg)}
+.bg{font-size:9px;color:#a8a29e}
+.sl{padding:2px 0 2px 16px}
+.sr{width:100%;display:flex;align-items:center;gap:7px;padding:7px 5px;background:transparent;border:none;border-bottom:1px solid #f5f5f4;cursor:pointer;font-size:12px;text-align:left;color:#44403c;font-family:inherit;-webkit-appearance:none}
+.sr:active{background:#fafaf9}
+.sr.d{color:#16a34a}
+.sc{width:18px;height:18px;border-radius:4px;border:2px solid #d6d3d1;background:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0}
+.sc.d{border-color:#16a34a;background:#16a34a}
+.sn{flex:1;line-height:1.25}
+.sn.s{text-decoration:line-through;opacity:0.45}
+.ht{text-align:center;padding:16px 0;color:#a8a29e;font-size:12px}
+.tt{position:fixed;bottom:calc(14px + var(--sb));left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;padding:5px 14px;border-radius:16px;font-size:11px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:100}
+.tt.sh{opacity:1}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>Fahrzeugcheck</h1><p>BRK Kreisverband Ostallg&auml;u</p></div>
+<div class="tabs" id="tabs"></div>
+<div class="pr"><div class="pb"><div class="pf" id="pF"></div></div><span class="pt" id="pT"></span><button class="rb" onclick="doR()">Reset</button></div>
+<div id="main"></div>
+<div id="pnl"></div>
+<div class="tt" id="tt">Gespeichert &#10003;</div>
+<script>
+// =====================================================================
+// VEHICLE DATA
+// =====================================================================
+var V={
+RTW:{label:"RTW",color:"#b91c1c",
+// Vehicle zones (physical positions)
+fzZones:{
+kabine400:{label:"Kabine",x:2,y:3,w:18,h:35,items:[
+{name:"400 Fahrerkabine",sub:["Fernbedienung Rolltor","Handscheinwerfer","Handscheinwerfer - Vorsteckplatte orange","Handy mit Ladeeinheit","HRT","Navigationsgeraet","Schneeketten (1 Paar)","Schutzhelm mit Visier","Sicherheitsgurt-Durchtrenner","Sicherheitshandschuhe EN 420","Stirnlampe (Hisabra)","Suchscheinwerfer","Verbandkasten Kfz","Warndreieck"]},
+{name:"401 Schreibbrett Fahrtenbuch",sub:["Fahrtenbuchtgehaelter (2 Blatt)","Fahrzeugordner","Kartenmaterial"]},
+{name:"420 Mittelfach",sub:["Kennzeichnungsweste gelb (erster RTW)","Tasche erstes Rettungsmittel (gelb)"]},
+{name:"421 Tasche erstes RM (gelb)",sub:["Schreibbrett Erstes RM","Schreibbrett Erstes RM: Vorderseite mit Aufgaben (2x)","Schreibbrett Erstes RM: Leerblatt kariert A4 (5x)","Schreibbrett Erstes RM: Patientenliste (2x)"]},
+{name:"422 Maeppchen in Tasche",sub:["Bleistift 8B (2x)","Folienstift (2x)","Permanent-Marker","Radiergummi","Spitzer"]},
+{name:"430 Handschuhfach",sub:["Betriebsanleitung Fahrzeug","Schluessel fuer Absperrungen (Dreikant)","Tankkarte"]},
+{name:"BZ-Set",sub:["BZ-Lanzetten Variosafe (4x)","BZ-Messgeraet","BZ-Teststreifen (min. 10x)"]}
+]},
+aussen019:{label:"Aussen\nFahrer",x:2,y:40,w:18,h:18,items:[
+{name:"019 Aussenschrank Fahrerseite",sub:["Bolzenschneider","Brechschere","Feueroescher","Reifenkeil","Reifenpannenset","Taschenlampe","Tagesverlegerung Notbetrieb (nur Powerload)","Warndreieck"]}
+]},
+heck010:{label:"Heck\n010+011",x:2,y:60,w:18,h:38,items:[
+{name:"010 Aufbewahrungsschrank",sub:["Gurte fuer Schaufeltrage","HWS-Schiene (Erwachsene)","HWS-Schiene Laerdal SilNeck","HWS-Schiene PaediSelect","Immobilisationstasche","Kopfkissen Schaufeltrage - Ferno Orange mit Fixiergurt","Kopfkissen Spineboard","Schaufeltrage - Grifffaecher nummeriert","Spineboard","Tragstuhl"]},
+{name:"011 Immobilisationstasche",sub:["Beckenschlinge","Einmaldecke weiss 190x110cm 250g","Gurtspinne","HWS-Schiene Laerdal SilNeck Adult","HWS-Schiene STIFNECK SELECT (Kinder)","Leukosilk 1,25 cm","Rettungsdecke","Waermekissen"]}
+]},
+o2_links:{label:"O2\n090-100",x:22,y:75,w:12,h:23,items:[
+{name:"080 Sauerstoffschrank oben",sub:["Rettungstuch rot mit Fussack","Verbandskoffer - Siegel OK"]},
+{name:"090 Sauerstoffschrank mitte",sub:["Crash-Set fuer Spritzenpumpe","Regenbezug fuer Trage","Sicherungsgurte fuer Gepaeck (2x)","Spritzenpumpe mit Ladekabel"]},
+{name:"091 Crash-Set - Spritzenpumpe",sub:["Dreiwegehahn mit Verlaengerung (2x)","Perfusorleitung 150cm (2x)","Perfusorspritze 50ml (2x)","Rueckschlagventil (2x)"]},
+{name:"100 Sauerstoffschrank unten",sub:["Normschiene","Regenschirm","Sauerstoffflasche 10 Liter (2x)","Sauerstoffflasche 2 Liter"]}
+]},
+vakuum070:{label:"Vakuum\n070",x:84,y:75,w:14,h:23,items:[
+{name:"070 Schrank Vakuummatratze",sub:["KED-System","Lagerungskissen blau","Vakuummatratze","Vakuumschiene Arm","Vakuumschiene Arm (Kind)","Vakuumschiene Bein","Vakuumschiene Bein (Kind)"]}
+]},
+apo_links:{label:"Apotheker\n110-170",x:22,y:3,w:12,h:42,items:[
+{name:"110 Apothekerschrank (Ebene 01)",sub:["Sauerstoffbrille (3x)","Verneblermaske Erwachsene"]},
+{name:"120 Apothekerschrank (Ebene 02)",sub:["Dreiecktuch (2x)","Ersatzbatterien (1 Satz)","Kleiderschere einfach","Mullbinde 6cm (2x)","Mullkompressen 10x10cm steril (5x)","Pflaster in Metalldose","Rettungsdecke","Saugkompresse (2x)","Verbandpaeckchen gross (4x)","Verbandtuch 40 x 60cm"]},
+{name:"130 Apothekerschrank (Ebene 03)",sub:["Universalschiene SAM SPLINT, gerollt"]},
+{name:"140 Apothekerschrank (Ebene 04)",sub:["BZ-Set in Tasche","EKG-Elektroden (Erwachsene)","EKG-Papier Corpuls C3T"]},
+{name:"150 Apothekerschrank (Ebene 05)",sub:["BTM-Box - nicht in Ersatzfahrzeugen","Kaelte-Kompresse"]},
+{name:"151 BTM-Box",sub:["Fentanyl 0,5mg/10ml (3-6x)","Morphin 10mg/1ml (3-6x)","Piritramid 7,5mg/ml (3-6x)"]},
+{name:"160 Apothekerschrank (Ebene 06)",sub:["Schutzbrille (3x)","Teddybaer (2x)"]},
+{name:"170 Apothekerschrank (Ebene 07)",sub:["Gelatineloesung 4% 500ml (2x)","Absaugbeutel Serres 1000ml","Urinalbeutel JohnnyWee 3x (3x)"]}
+]},
+medi:{label:"Medi\n180-185",x:22,y:47,w:12,h:26,items:[
+{name:"180 Medikamentenschrank",sub:["Aqua 20ml Kunststoffampulle (2x)","ASS-ratiopharm 100mg Tabletten (3 Tabl.)","Captopril 12,5mg (2 Tabl.)","Ceftriaxon 2,0g DsFl.","Glucose 5% 100ml Durchstechflasche","Glucosteril 40% 10ml (Glucose) (5x)","Levetiracetam 500mg/5ml","Lorazepam 1mg (Tavor) (2 Tabl.)","Naloxon Einzeldosis Nasal 2x1,8mg","Oxymetazolin 0,05% (Nasivin)","Combistopfen (4-6x)","Aufziehkanuele","Einmalspritze 1ml Totraumfrei (5-10x)","Einmalspritze 2ml (5-10x)","Einmalspritze 5ml (5-10x)","Einmalspritze 10ml (4x)","Einmalspritze 20ml (4x)","Folienstift","Infusionssystem mit Rueckfluesssperre (2x)","Injektionskanuele 22G 40mm (2x)","Injektionskanuele 26G 13mm (Subkutane Injektion) (5x)","Kanuelenfixierpflaster (5x)","Medikamenten-Aufkleber BRK-Patienten-Bogen (1 Bogen)","Medikamentenliste (3x)","Mini-Spike (2x)","Monovetten-Set Kreuzblut/Lactat (4 Set)","Monovetten-Set Standard (1 Set)","Pupillenleuchte","Tabelle Medikamentenverdunnung","Venenverweilkanuele 14G orange (3-6x)","Venenverweilkanuele 18G gruen-weiss (3-6x)","Venenverweilkanuele 20G rosa-weiss (3-6x)","Venenverweilkanuele 22G blau (3-6x)","Venenverweilkanuele 24G gelb (2x)","Zellstofftupfer unsteril 4x5cm (10-20x)"]},
+{name:"181 Crash-Set fuer IV-Zugang",sub:["Cutasept F farblos 250ml","Infusionsfixierung","Leukosilk 2,50 cm","Monovetten-Set Standard","Nierenschale","Staubinde","Tupfer unsteril (5-10x)","Venenverweilkanuele 18G","Venenverweilkanuele 20G"]},
+{name:"182 Medikamentenschrank MAD-Set",sub:["Midazolam 15mg/3ml","Einmalspritze 3ml (LuerLock)","Nasenzerstauber MAD 300"]},
+{name:"183 Medikamentenplatte alphabetisch",sub:["Adenosin 6mg/2ml (Adrekar) (2x)","Amiodaron 150mg/3ml (2x)","Atropinsulfat 0,5mg/1ml","Butylscopolamin 20mg/1ml (BS)","Cafedrin/Theodrenalin 2ml (Akrinor)","Cormagnesin 200","Dimenhydrinat 62mg/10ml","Dimentindenmaleat 1mg/1ml (Fenistil)","Epinephrin (Adrenalin) 1mg/1ml","Esketamin (Ketanest S)","Fenoterol 25mcg (Partusisten)","Flumazenil 0,5mg/5ml","Furosemid 40mg/4ml","Haloperidol 5mg/1ml (Haldol)","Heparin 25.000 IE/5ml","Ipratropiumbromid 0,50mg/2ml (Atrovent)","Metamizol 1g/2ml (Novamin) (2x)","Metoprolol 1mg/1ml","Midazolam 5mg/5ml","Naloxon 0,4mg/1ml","Norepinephrin 10mg/10ml","Ondansetron 4mg/2ml","Oxytocin 3IE/1ml","Prednisolon 250mg (Solu-Decortin H)","Promethazin 50mg/2ml","Propofol 1%/20ml","Reproterol 0,09mg/1ml (Bronchospasmin)","Rocuronium 10mg/ml (2x)","Salbutamol Fertiginhalat (2x)","Thiamin (Vitamin B1)","Tranexamsaeure 100mg/ml (2x)","Urapidil 50mg/10ml (Ebrantil)","Xylocain 2%"]},
+{name:"184 Aqua 5ml (4x)",sub:["Aqua 5ml (4x)"]},
+{name:"185 Steckampullenleiste",sub:["Acetylsalicylsaeure 500mg (Aspirin)","Epinephrin 25mg/25ml (Suprarenin) (3x)","Prednisolon 250mg (Solu-Decortin H) (2x)","Rocuronium 10mg/ml","Thiopental 0,5g TS DsFl."]}
+]},
+schubl_L:{label:"Schubladen\nLinks\n200-230",x:36,y:47,w:14,h:51,items:[
+{name:"190 Waschbecken",sub:["Abfallbeutel (1 Rol.)","Basilo 30 Foam (1 Fla.)","Kanuelenabwurf klein","Vliestuch blau/weiss (20x)"]},
+{name:"200 Schublade links 1 (Waermefach)",sub:["Jonosteril Freeflex 500ml (5x)","NaCl 0,9% 100ml Kunststoffflasche"]},
+{name:"210 Schublade links 2",sub:["Beatmungsschlauch Medumat Standard","Beatmungsschlauch Medumat Standard 2","NIDA-Thermopapierrolle"]},
+{name:"220 Schublade links 3",sub:["Absaugeinheit - tragbar (manuell) mit Schlauch und Fingertip","Thoraxdrainage-Set","Thoraxkatheter mit Trokar CH 12 (2x)","Thoraxkatheter mit Trokar CH 20 (2x)","Thoraxkatheter mit Trokar CH 28 (2x)","Waermekissen"]},
+{name:"221 Thoraxdrainage-Set",sub:["Abdecktuch mit Loch (2x)","Arterienklemme Pean gebogen","Einmalhandschuhe steril 6,5 (1 Paar)","Einmalhandschuhe steril 7,5 (1 Paar)","Einmalhandschuhe steril 8,5 (1 Paar)","Faden steril (3x)","Fingertip (steril) (2x)","Fixomull Stretch ca. 20x20cm (2x)","Kornzange gebogen","Nadelhalter","Pinzette chirurgisch fein 14,5cm","Schere (Metzenbaum) gebog. s/st 18cm (4x)","Schlitzkompressen (2x)","Sekretbeutel 1500ml (2x)","Skalpell","Verbandtuch 40x60cm"]},
+{name:"230 Schublade links 4",sub:["Dreiecktuch (5x)","Mullbinde 6cm (10x)","Mullkompressen 10x10cm steril (10x)","Replantatbeutel Bein","Replantatbeutel Hand","Rettungsdecke (5x)","Verbandpaeckchen gross (10x)","Verbandtuch 40x60cm (5x)","Verbandtuch 73x220cm","Verbandtuch Aludern 80x120cm (2x)"]}
+]},
+schrank_mitte:{label:"Mitte\n240-264",x:52,y:3,w:14,h:55,items:[
+{name:"240 Schrank oben mitte",sub:["Einmaldecke (5-10x)","Einmalumbettungstuch (4-6x)","Kleiderschere Robin","Schluessel fuer Fach hinter Notsitz","Trageauflagen (4-6x)"]},
+{name:"260 Schrank hinter Notsitz",sub:["Infektionsschutz-Set (1 Set)","Rettungswurfsack, leuchtorange, mit Leine","Tasche Einsatzabschnitt (weiss)","Vorsichtungsrucksack rot"]},
+{name:"262 Tasche EAL (weiss)",sub:["Kennzeichnungsweste (Abschnittleiter)","Schreibbrett EAL Bereitstellungsraum: Fahrzeuguebersicht (5x)","Schreibbrett EAL Bereitstellungsraum: Info BR A5 (5x)","Schreibbrett EAL Bereitstellungsraum: Leerblatt kariert A4","Schreibbrett EAL Patientenablage: Info PAL A5 (5x)","Schreibbrett EAL Patientenablage: Leerblatt kariert A4","Schreibbrett EAL Patientenablage: Patientenliste (5x)"]},
+{name:"263 Maeppchen rot",sub:["Bleistift 8B (2x)","Folienstift (2x)","Permanent-Marker","Radiergummi","Spitzer"]},
+{name:"264 Infektionsschutz-Set Tasche gruen",sub:["Infektionsschutzittel gelb, 130cm lang (4x)","Infektionswaschekittel","Infektionsschutzittel"]}
+]},
+c3_taschen:{label:"C3\n053-059",x:52,y:60,w:14,h:16,items:[
+{name:"053 C3: Tasche hinten",sub:["Defi-Klebeelektroden (Erwachsene) (2x)"]},
+{name:"054 C3: Corpus C3T (Erwachsene)",sub:["EKG-Extremitaetenableitungskabel"]},
+{name:"055 C3: Tasche links innen",sub:["Einmalrasierer (min. 20x)","EKG-Brustwandableitungskabel"]},
+{name:"056 C3: Tasche links innen",sub:["Ohrtip Pulsoxymetrie C3","Ohrthermometer ThermoScan","ThermoScan Pro 6000 Schutzkappen (5x)"]},
+{name:"057 C3: Tasche rechts aussen",sub:["Blutdruckmanschette C3 Gr. S hellblau","Blutdruckmanschette Erwachsen C3"]},
+{name:"058 C3: Tasche rechts mitte",sub:["CO2 Endotrachealtibus Einwegadapter Hauptstrom Erwachsen C3","CO2 NasalOral Einwegadapter capONE","Kapnographeadapter"]},
+{name:"059 C3: Zubehoertasche",sub:["NaCl 0,9% 500ml Flexbeutel","arterielle Druckmessung Flexbeutel","Feedbacksensor primiCPR (Corpuls C3T)","CO-Oximeter RAD 57","Corpus C3T Temperatursonde","Einwegbezug Temperatur Rektalsonde","IBP-Druckmesser","Magnet fuer ICDs"]}
+]},
+schubl_R:{label:"Schubladen\nRechts\n280-291",x:68,y:3,w:14,h:55,items:[
+{name:"270 Fach Kinderkoffer",sub:["Beatmungsschlauch Medumat Standard rot, Totraumvolumen Kind"]},
+{name:"280 Schublade rechts 1",sub:["BTM-Buch","Fahrzeugcheckliste","Infektionsschutzittel (4x)","Infektionswaschekittel","Kurzanleitung Kontrolle Anlage I-Geraete","Pruefbeutel fuer Beatmungsgeraet","Schreibbrett","Tasche fuer Patienteneigentum (2x)","Test-Widerstand C3"]},
+{name:"290 Schublade rechts 2",sub:["Aquagel","Bakterien/Virenfilter Clear-Guard 3 mit Luer","Beatmungsbeutel Erwachsene m. Reservoir","Beatmungsmaske L","Beatmungsmaske M","Beatmungsmaske S","BOUGIE Intubationshilfe CH14","Blockerspritze 10ml","Cuffdruckmesser","Endotracheal-Tubus 6,5 (mit Mandrin) (2x)","Endotracheal-Tubus 7,5 (mit Mandrin) (2x)","Endotracheal-Tubus 8,5 (mit Mandrin)","Gaensegurgel","Guedeltubus 2","Guedeltubus 3","Guedeltubus 4","Kopfband fuer CPAP-Maske","Laryngoskopgriff gross","Laryngoskopspatel 3 (Macintosh)","Laryngoskopspatel 4 (Macintosh)","Larynxmaske Gr. 3","Larynxmaske Gr. 4","Larynxmaske Gr. 5","Leukosilk 2,50 cm","Magensonde 12 Ch Weiss","Magensonde 14 Ch Gruen","Magillzange (gross)","PEEP-Ventil","Perfusorspritze 50ml","Sekretbeutel 1.500 ml","Testspatel fuer Laryngoskope","Thomas-Holder Select Adult","Wendl-Tubus 28 Ch","Wendl-Tubus 32 Ch"]},
+{name:"291 Schreibbrett",sub:["Einsatz- und Reanimationsprotokoll (5x)","Notarzt-Einsatzprotokoll RD Bayern (5x)","Transportanweisungen (1 Block)","Wochencheckliste"]}
+]},
+trage:{label:"Trage\n020+040+060-063",x:36,y:3,w:14,h:42,items:[
+{name:"020 Patientenraum",sub:["Absaugeinheit - tragbar (elektrisch) ACCUVAC","Beatmungsgeraet","Einmalhandschuhe unsteril L (min. 20x)","Einmalhandschuhe unsteril M (min. 20x)","Einmalhandschuhe unsteril S","Einmalhandschuhe unsteril XL (min. 20x)","Einmalhandtuch Papier","EKG","Haendedesinfektionsmittel 500ml"]},
+{name:"040 Absaugpumpe el. ACCUVAC",sub:["Kanuelenabwurf gross","Thermodecke","Trage","Absaugkatheter CH 08 Blau (2x)","Absaugkatheter CH 12 Weiss (2x)","Absaugkatheter CH 18 Rot (3x)","Fingertip (3x)"]},
+{name:"060 Fach Vakuummatratze",sub:["Magnet fuer ICDs","Schnittmuster RD"]},
+{name:"062 Zubehoertasche C3",sub:["Brechbeutel SicSac","Nierenschale","Rollbrett"]},
+{name:"063 Trage unter Auflage Fussteil",sub:["Einmalumbettungstuch","Tragelaken"]}
+]},
+inselschrank:{label:"Insel\nSchrank",x:84,y:3,w:14,h:42,items:[
+{name:"Inselschrank Schublade 1",sub:["Crash-Set fuer i.v.-Zugang Fahrzeug"]},
+{name:"Inselschrank Schublade 2",sub:["Blutdruckmessgeraet","FFP2 Masken (4x)","Mund-Nasenschutz (3x)","Sauerstoff-Verlaengerungsschlauch","Sauerstoffmaske Erwachsene mit Filter (Corona)","Sauerstoffmaske Erwachsene mit Reservoir (2x)","Stethoskop Erwachsene"]},
+{name:"Inselschrank Schublade 3",sub:["Brechbeutel SicSac (5x)","Nierenschale (5x)"]}
+]},
+kind210:{label:"Kind\n+Crash\n210",x:84,y:47,w:14,h:26,items:[
+{name:"210 Kind+Crash oben",sub:["Beatmungsschlauch Medumat Standard","Kindernotfalltasche"]}
+]}
+},
+// Equipment outside vehicle
+equipment:[
+{id:"atmung",label:"Atmungsrucksack",color:"#16a34a",icon:"\uD83C\uDF2C",items:[
+{name:"Rucksack Atmung Hauptfach",sub:["Demandventil","BOUGIE Intubationshilfe CH14"]},
+{name:"3fach-Tasche: Beatmung",sub:["Bakterien/Virenfilter Clear-Guard 3 mit Luer","Beatmungsbeutel Erwachsene m. Reservoir","Beatmungsmaske L","Beatmungsmaske M","Beatmungsmaske S","PEEP-Ventil"]},
+{name:"3fach-Tasche: Einfacher Atemweg",sub:["Gaensegurgel","Guedeltubus 2","Guedeltubus 3","Guedeltubus 4","Wendl-Tubus 28 Ch","Wendl-Tubus 32 Ch"]},
+{name:"3fach-Tasche: Infektionsschutz",sub:["Atemschutzmaske FFP3 (2x)","Mund-Nasenschutz (2x)","Schutzbrille (6x)"]},
+{name:"Sauerstofftasche",sub:["Druckminderer mit O2-Abgabemoegl.","Modultsche gruen","Sauerstoff-Verlaengerungsschlauch","Sauerstoffbrille","Sauerstoffflasche 2 Liter","Sauerstoffmaske Erw. mit Filter (Corona)","Sauerstoffmaske Erw. mit Reservoir","Verneblermaske Erwachsene"]},
+{name:"Sauerstofftasche Modultasche gruen",sub:["Nasenspekulum","Pneumothorax-Kanuele 14G (2x)","Quicktrach II mit Cuff ID=4mm","SAM Chest Seal mit Ventil (2x)","Skalpell"]},
+{name:"Set ET",sub:["Abfallbeutel ND 30l","Aquagel","Blockerspritze 10ml","ET-Tubus 5,5 (Mandrin)","ET-Tubus 6,5 (Mandrin)","ET-Tubus 7,5 (Mandrin)","ET-Tubus 8,5 (Mandrin)","Laryngoskopgriff gross","Laryngoskopspatel 3 (Mac)","Laryngoskopspatel 4 (Mac)","Magillzange (gross)","Thomas-Holder Select Adult"]},
+{name:"Set LaMa",sub:["Abfallbeutel ND 30l","Aquagel","Larynxmaske Gr. 3","Larynxmaske Gr. 4","Larynxmaske Gr. 5","Leukosilk 2,50 cm","Magensonde 12 Ch","Magensonde 14 Ch","Perfusorspritze 50ml","Sekretbeutel 1.500 ml"]}
+]},
+{id:"kreislauf",label:"Kreislaufrucksack",color:"#2563eb",icon:"\uD83D\uDC99",items:[
+{name:"Basic-Kit/Crash-Set i.v.",sub:["Jonosteril Freeflex 500ml","NaCl 0,9% 100ml","Crash-Set","Cutasept F 250ml","Infusionssystem","Kanuelenabwurf klein","Kanuelenfixierpflaster (2x)","Leukosilk 2,50 cm","Monovetten-Set Kreuzblut","Monovetten-Set Standard","Staubinde","VVK 14G orange (2x)","VVK 18G gruen-weiss (2x)","VVK 20G rosa-weiss (2x)","VVK 22G blau (2x)","VVK 24G gelb (2x)","Zellstofftupfer 4x5cm (10-20x)"]},
+{name:"Infusion Ersatz",sub:["Glucose 5% 250ml","Jonosteril Freeflex 500ml (Flexbeutel)","Infusionsfixierung (2x)","Infusionssystem mit Rueckfluesssperre","Monovetten-Set Standard"]},
+{name:"Set Diagnostik/Sonstiges",sub:["RR-Manschette C3 Adipositas","Blutdruckmessgeraet","Brechbeutel SicSac","BZ-Set in Tasche","EKG-Papier C3T","FFP2 Masken (4x)","Kleiderschere Robin","Pupillenleuchte","Stethoskop Erwachsene"]},
+{name:"Set EZ-IO",sub:["Dreiwegehahn","Druckinfusionsgeraet","Einmalspritze 10ml LuerLock (2x)","EZ-IO m. Betaetigungssicherung","EZ-IO Nadel 15mm rosa","EZ-IO Nadel 25mm blau","EZ-IO Nadel 45mm gelb"]},
+{name:"3fach-Tasche: Immobilisation",sub:["Dreiecktuch (2x)","Einmalhandschuhe XL (6x)","SAM SPLINT gerollt"]},
+{name:"3fach-Tasche: Verbandmaterial",sub:["Celox Z-Fold Gauze 5ft (2x)","Emergency Bandage 10cm x 4,5m","Mullbinde 6cm (2x)","Mullkompressen 10x10cm (2x)","Rettungsdecke (4x)","Saugkompresse","Tourniquet C-A-T","Verbandpaeckchen gross (2x)","Verbandtuch 40x60cm"]},
+{name:"Ampullarium RTW - Wirkstoff",sub:["Acetylsalicylsaeure 500mg","Adenosin 6mg/2ml (2x)","Amiodaron 150mg/3ml (2x)","Aqua 20ml (2x)","Aqua 5ml (2x)","Atropinsulfat 0,5mg/1ml (2x)","Butylscopolamin 20mg/1ml","Cafedrin/Theodrenalin 2ml (Akrinor)","Cormagnesin 200","Dimenhydrinat 62mg/10ml","Dimentindenmaleat 1mg/1ml","Epinephrin 1mg/1ml","Esketamin (Ketanest S) (2x)","Fenoterol 25mcg (Partusisten)","Flumazenil 0,5mg/5ml","Furosemid 40mg/4ml","Glucosteril 40% 10ml (5x)","Haloperidol 5mg/1ml","Heparin 25.000IE/5ml","Ipratropiumbromid 0,50mg/2ml","Metamizol 1g/2ml (2x)","Metoprolol 1mg/1ml","Midazolam 5mg/5ml (2x)","Naloxon 0,4mg/1ml","Norepinephrin 10mg/10ml","Ondansetron 4mg/2ml","Oxytocin 3IE/1ml (2x)","Prednisolon 250mg","Promethazin 50mg/2ml","Propofol 1%/20ml","Reproterol (Bronchospasmin)","Rocuronium 10mg/ml (2x)","Salbutamol Fertiginhalat (2x)","Thiamin (B1)","Tranexamsaeure 100mg/ml (2x)","Urapidil 50mg/10ml","Xylocain 2%"]},
+{name:"Ampullarium RTW Modultasche",sub:["ASS 100mg Tabl. (3x)","Captopril 12,5mg (2 Tabl.)","Epinephrin 25mg/25ml (Suprarenin) (2 Tabl.)","Glucose-Gel 30g per os","Glyceroltrinitrat Spray","Lorazepam 1mg (Tavor)","Naloxon Nasal 2x1,8mg (2 Tabl.)"]},
+{name:"MAD-Set",sub:["Midazolam 15mg/3ml","Einmalspritze 3ml LuerLock","Nasenzerstauber MAD 300"]}
+]},
+{id:"vorsichtung",label:"Vorsichtungsrucksack",color:"#dc2626",icon:"\uD83D\uDFE5",items:[
+{name:"082 Aussenfach Modultsche 1",sub:["Emergency Bandage 10cm x 4,5m (5x)","Verbandpaeckchen gross (5x)"]},
+{name:"084 Hauptfach Deckel",sub:["Wendl-Tubus 16 Ch (3x)","Wendl-Tubus 28 Ch (6x)"]},
+{name:"085 Bleistiftmaeppchen",sub:["Bleistift 8B (2x)","Folienstift (2x)","Permanent-Marker","Radiergummi","Spitzer"]},
+{name:"086 Hauptfach Boden",sub:["Aufkleber Transportprioritaet (2x)","Flatterband rot/weiss","Flatterband schwarz/weiss","Patientenanhaengekarten (25x)","Schreibbretter Nachsichtung + Vorsichtung","Vorsichtungsalgorithmus ALRD-Bayern","Vorsichtungsweste rot"]},
+{name:"087 Modultsche lang",sub:["Tourniquet C-A-T (4x)"]}
+]},
+{id:"kind",label:"Kindernotfalltasche",color:"#ca8a04",icon:"\uD83D\uDC76",items:[
+{name:"705 Medikamente (gruen)",sub:["Diazepam Rect. 5mg (2x)","Levocetrizin supp. (2x)","Paracetamol supp. 250mg (2x)","Paracetamol supp. 75mg","Prednisolon 100mg supp. (2x)","Xylometazolin 0,025"]},
+{name:"707/708 KNR Atmung",sub:["Bakterien/Virenfilter Kinder","Beatmungsschlauch Kinder","Beatmungsmaske INFANT","Beatmungsmaske NEONAT","CO2 Endotrachealtubus"]},
+{name:"711 KNR Atmung Paediatric",sub:["Guedeltubus 0","Guedeltubus 00","Guedeltubus 000","Magillzange klein Paediatric","Thomas-Holder Paediatric"]},
+{name:"713 KNR Atmung Modul 2.1 ET",sub:["Abfallbeutel ND 30l","Aquagel","Blockerspritze 5ml","ET-Tubus 2.5 OHNE CUFF","ET-Tubus 3.0","ET-Tubus 3.0 OHNE CUFF","ET-Tubus 3.5","ET-Tubus 3.5 OHNE CUFF","ET-Tubus 4.0","ET-Tubus 4.5","ET-Tubus 5.0 (Mandrin)","ET-Tubus 5.5 (Mandrin)","ET-Tubus 6.0 (Mandrin)","Fuehrungsmandrin 2,0mm CH6","Fuehrungsmandrin 3,3mm CH10"]},
+{name:"714 KNR Atmung Modul 2.2 LT",sub:["Absaugkatheter CH 06","Aquagel","Blockerspritze 20ml","Larynxmaske Gr. 1 bis 2,5","Leukosilk 1,25 cm","Magensonde 08/12 Ch","Sekretbeutel 1.500 ml","Wendl-Tubus 16/18/20 Ch"]},
+{name:"701 KNR Kreislauf Modul 1.1",sub:["RR-Manschette C3 Kinder","RR-Manschette Saeugling","Einmalspritze 1ml","Perfusorspritze 50ml","Staubinde","Stethoskop","Thermometer","VVK 24G lila (3x)","VVK 26G lila"]},
+{name:"702 KNR Kreislauf (Nogeburt)",sub:["Mullkompressen (5x)","Nabelbinde+Klemme+Schere","Saugkompresse","Silberwundauflage","Verbandtuch 40x60cm"]},
+{name:"703/704 KNR Kreislauf Modul 2",sub:["Defi-Klebeelektroden Kinder","EKG-Elektroden easy C3","C3LP15 Phaser-Sensor Kleinkinder","Modultasche Medikamente (gruen)"]}
+]},
+{id:"verband",label:"Verbandskoffer",color:"#7c3aed",icon:"\uD83E\uDE79",items:[
+"Dreiecktuch (5x)","Mullbinde 6cm (10x)","Mullkompressen 10x10cm (10x)","Replantatbeutel Bein","Replantatbeutel Hand","Rettungsdecke (5x)","Verbandpaeckchen gross (10x)","Verbandtuch 40x60cm (5x)","Verbandtuch 73x220cm","Verbandtuch Aludern 80x120cm (2x)"
+]}
+]
+},
+
+NEF:{label:"NEF",color:"#b91c1c",
+fzZones:{
+kabine:{label:"Kabine\n300-330",x:2,y:15,w:30,h:70,items:[
+{name:"300 Ruecksitzbank",sub:["Brechschere","Fahrzeugordner","Feueroescher","Kartenmaterial","Ladekabel 230V","Sauerstoffflasche 2 Liter (2x)","Schutzhelm mit Visier"]},
+{name:"302 Fussraum hinten links",sub:["Abschleppmoese","Reifenpannenset"]},
+{name:"310 Mittelkonsole links",sub:["Einmalhandschuhe L/M/XL (je min. 20x)"]},
+{name:"330 Fach 1",sub:["BTM-Box","BTM-Buch","FFP2 Masken (4x)","Handscheinwerfer orange","Infektionsschutzittel (2x)","Notarzt-Einsatzprotokoll (4x)","Schutzbrille (2x)","Todesbescheinigungen (2x)","Transportanweisungen (1 Block)"]}
+]},
+hintenLinks:{label:"Hinten\nlinks\n340-350",x:34,y:5,w:22,h:38,items:[
+{name:"330 i-Bougie",sub:["i-Bougie"]},
+{name:"340/341/342 Faecher",sub:["Beispiel - bitte ergaenzen"]},
+{name:"343 Fach",sub:["Beispiel - bitte ergaenzen"]},
+{name:"350 Fach",sub:["Beispiel - bitte ergaenzen"]}
+]},
+hintenRechts:{label:"Hinten\nrechts\n360+064+065",x:34,y:57,w:22,h:38,items:[
+{name:"064 hinter Ruecksitzlehne",sub:["Lucas 3","Pneumothoraxtasche NEF"]},
+{name:"065 Lucas 2-Tasche",sub:["Lucas 3 Gleichstromkabel 12V","Lucas 3 Nackenriemen","Lucas 3 Netzteil mit Netzkabel 230V","Lucas 3 Thoraxkompressionssystem mit Rueckenplatte","Saugglocke - Lucas 3"]},
+{name:"360 Fussraum",sub:["Kindernotfall-Tasche"]},
+{name:"363 Antidot-Set",sub:["Antidot-Set"]},
+{name:"690-910 Schutzausruestung",sub:["Einmalhandschuhe","Schutzbrille"]}
+]},
+heck:{label:"Heck\n030+040+650",x:60,y:15,w:38,h:70,items:[
+{name:"030 Beatmungsgeraet",sub:["Kurzanleitung NIV Medumat Transport","Pruefbeutel fuer Beatmungsgeraet","Sauerstoff-Verlaengerungsschlauch","Sauerstoffflasche Erw. mit Filter (Corona)","Sauerstoffmaske Erw. mit Reservoir"]},
+{name:"040 Absaugpumpe el. ACCUVAC",sub:["Absaugkatheter CH 08 Blau (2x)","Absaugkatheter CH 12 Weiss (2x)","Absaugkatheter CH 18 Rot (2x)","Fingertip"]},
+{name:"650/653 Kreislauf+Atmung",sub:["Kreislaufrucksack NEF","Atmungsrucksack NEF"]},
+{name:"013 Gepaecknetz",sub:["HWS-Schiene (Erwachsene)","HWS-Schiene STIFNECK SELECT (Kinder)","Kennzeichnungsweste gelb"]},
+{name:"014 Gepaeckfach",sub:["Verbandkasten Kfz"]},
+"500 Vorsichtungsrucksack Siegel OK","Tankkarte"
+]}
+},
+equipment:[
+{id:"atmungNEF",label:"Atmungsrucksack NEF",color:"#16a34a",icon:"\uD83C\uDF2C",items:[
+{name:"530 Atmungsrucksack",sub:["Demandventil","Druckminderer O2","Sauerstoffflasche 2L"]},
+{name:"531 Modultasche grau",sub:["Bakterien/Virenfilter","Beatmungsbeutel Erw. m. Reservoir","Beatmungsmaske L/M/S","Gaensegurgel","Guedeltubus 2/3/4","PEEP-Ventil","Pneumothorax-Kanuele 14G","SAM Chest Seal (2x)","Wendl-Tubus 28/32 Ch"]},
+{name:"532 Modultasche Neongelb",sub:["Sauerstoff-Verlaengerungsschlauch","Sauerstoffbrille","Sauerstoffmaske Erw. mit Reservoir","Verneblermaske Erwachsene"]},
+{name:"534 Atmungsrucksack",sub:["Abfallbeutel ND 30l","Aquagel","Blockerspritze 10ml","ET-Tubus 6,5/7,5/8,5 (Mandrin)","Laryngoskopgriff gross (3x)","Laryngoskopspatel 3+4 (Mac)","Magillzange","Testspatel","Thomas-Holder Select Adult"]}
+]},
+{id:"kreislaufNEF",label:"Kreislaufrucksack NEF",color:"#2563eb",icon:"\uD83D\uDC99",items:[
+{name:"515 Schreibbrett",sub:["Schreibbrett"]},
+{name:"516 Modultasche rot",sub:["Jonosteril 500ml","Cutasept F 250ml","Kanuelenabwurf (3x)","Kanuelenfixierpflaster","Leukosilk 2,50cm","Monovetten-Sets","Staubinde","VVK 14G/18G/20G/22G/24G","Zellstofftupfer (10-20x)"]},
+{name:"517 Modultasche lila",sub:["Glucose 5% 250ml","Glucose-Gel 30g (2x)","Jonosteril 500ml Flexbeutel","Infusionssystem (2x)"]},
+{name:"518 Modultasche schwarz",sub:["Ceftriaxon 2,0g DsFl.","NaCl 0,9% 100ml","Infusionssystem"]},
+{name:"519 Modultasche gelb",sub:["Kleiderschere","Mullbinde 6cm (2x)","Mullkompressen (4x)","Rettungsdecke (2x)","Saugkompresse","Verbandpaeckchen (2x)","Verbandtuch 40x60cm"]},
+{name:"520 Modultasche gruen",sub:["Blutdruckmessgeraet","Brechbeutel SicSac (2x)","Celox Z-Fold (2x)","Dreiecktuch (6x)","Emergency Bandage","Kleiderschere Robin","Mullbinde 6cm","Pupillenleuchte","Stethoskop","SAM SPLINT"]},
+{name:"521 EZ-IO orange",sub:["Dreiwegehahn","Druckinfusionsgeraet","Einmalspritze 10ml (2x)","EZ-IO","EZ-IO Nadel 15/25/45mm"]},
+{name:"Ampullarium NEF",sub:["Acetylsalicylsaeure 500mg","Adenosin 6mg/2ml (3x)","Amiodaron 150mg/3ml (2x)","Aqua 20ml (3x)","ASS 100mg (3 Tabl.)","Atropinsulfat 0,5mg/1ml (3x)","Butylscopolamin 20mg/1ml (3x)","Cafedrin/Theodrenalin 2ml","Cormagnesin 200","Dimenhydrinat 62mg/10ml (2x)","Dimentindenmaleat 1mg/1ml","Epinephrin 1mg/1ml (2x)","Esketamin (Ketanest S)","Fenoterol 25mcg","Flumazenil 0,5mg/5ml","Furosemid 40mg/4ml","Glucosteril 40% 10ml (6x)","Glyceroltrinitrat Spray","Haloperidol 5mg/1ml","Heparin 25.000IE/5ml","Ipratropiumbromid (Atrovent) (2x)","Lorazepam 1mg (Tavor) (2x)","Metamizol 1g/2ml (2x)","Metoprolol 1mg/1ml","Midazolam 5mg/5ml (2x)","Naloxon 0,4mg/1ml","Norepinephrin 10mg/10ml","Ondansetron 4mg/2ml (2x)","Oxytocin 3IE/1ml (2x)","Prednisolon 250mg (3x)","Promethazin 50mg/2ml","Propofol 1%/20ml (2x)","Reproterol (Bronchospasmin) (2x)","Rocuronium 10mg/ml (2x)","Salbutamol (2x)","Thiamin B1","Tranexamsaeure (2x)","Urapidil 50mg/10ml","Xylocain 2%"]}
+]},
+{id:"vorsichtungNEF",label:"Vorsichtungsrucksack",color:"#dc2626",icon:"\uD83D\uDFE5",items:[
+{name:"081 Aussenfach",sub:["SAM SPLINT gerollt (3x)"]},
+{name:"082 Modultsche 1",sub:["Verbandpaeckchen gross (5x)"]},
+{name:"084 Hauptfach Deckel",sub:["Wendl-Tubus 16 Ch (3x)","Wendl-Tubus 28 Ch (6x)"]},
+{name:"085 Bleistiftmaeppchen",sub:["Bleistift 8B (2x)","Folienstift (2x)","Permanent-Marker","Radiergummi","Spitzer"]},
+{name:"086 Hauptfach Boden",sub:["Aufkleber Transportprioritaet (2x)","Flatterband rot/weiss","Flatterband schwarz/weiss","Patientenanhaengekarten (25x)","Schreibbretter","Vorsichtungsalgorithmus ALRD-Bayern","Vorsichtungsweste rot"]},
+{name:"087 Modultsche lang",sub:["Tourniquet C-A-T (4x)"]},
+{name:"066/067/068/069 Pneumothorax",sub:["Einmalhandschuhe steril (3 Paar)","Thoraxkatheter CH 12/20/28","Abdecktuch (2x)","Arterienklemme","Faden steril (3x)","Fixomull (2x)","Kornzange","Nadelhalter","Pinzette","Schere","Schlitzkompressen (2x)","Skalpell","Fingertip steril (2x)","Sekretbeutel 1500ml (2x)","Nasenspekulum","Wund-/Trachealhaken"]}
+]}
+]
+},
+
+KTW:{label:"KTW",color:"#1d4ed8",
+fzZones:{
+kabine:{label:"Kabine\n200-430",x:2,y:15,w:30,h:70,items:[
+{name:"200 Fahrerkabine",sub:["Einmaldecke","Fernbedienung","HRT","Navigationsgeraet","Warnweste (2x)","Warndecke"]},
+{name:"401 Schreibbrett",sub:["Fahrtenbuch","Infoblatt erster KTW","Wochencheckliste"]},
+{name:"419 Fahrerkabine",sub:["Fahrzeugordner","Kartenmaterial"]},
+{name:"423 Fahrzeugordner",sub:["Aktualitaet kontrolliert"]},
+{name:"430 Handschuhfach",sub:["Betriebsanleitung","Schluessel Dreikant","Tankkarte"]}
+]},
+patientenraum:{label:"Patienten-\nraum\n020-062",x:34,y:5,w:30,h:50,items:[
+{name:"000 MPG-Inventar",sub:["Absaugeinheit tragbar ACCUVAC"]},
+{name:"020 Patientenraum",sub:["Einmalhandschuhe L/M/S/XL","Haendedesinfektionsmittel","EKG","Kanuelenabwurf gross","Thermodecke","Trage"]},
+{name:"021 Notfallrucksackfach",sub:["Notfallkoffer KTW","Sauerstoffflasche 2L"]},
+{name:"022 Fach ueber Rucksackfach",sub:["Gepaecknetz","Gurtspaenne","HWS-Schiene Erw.","HWS-Schiene STIFNECK Kinder","Kindersitzsystem","Rettungstuch rot","Sicherungsgurte (4x)"]},
+{name:"025 Schrank neben Trage",sub:["Vakuummatratze","Vakuumschiene Arm","Vakuumschiene Bein"]},
+{name:"027 Patientenraum Hecktuer",sub:["Schaufeltrage nummeriert"]},
+{name:"031 Sauerstoff",sub:["O2-Inhalationseinheit","O2-Inhalations-Set","Sauerstoffflasche blau","Sauerstoffbrille","Sauerstoffmaske mit Filter","Sauerstoffmaske mit Reservoir"]},
+{name:"040 Absaugpumpe",sub:["Absaugkatheter CH 08/12/18","Absaugbeutel Serres","Fingertip"]},
+{name:"041 Schrank ueber Trage",sub:["Absaugbeutel (2x)","Ohrthermometer-Schutzkappen","Pulsoximeter","Sauerstoffbrille","Sauerstoffmasken (3x)"]},
+{name:"043 Fach 3",sub:["Steckbecken","AED Lifepak","Defi-Klebeelektroden"]},
+{name:"050 AED",sub:["AED Lifepak"]},
+{name:"062 Trage unter Kopfteil",sub:["Brechbeutel SicSac","Einmalbettlakentuch","Nierenschale","Rollbrett","Tragelaken"]}
+]},
+schrank:{label:"Schrank\n041-195",x:34,y:57,w:30,h:38,items:[
+{name:"044 Ladestation",sub:["Ersatzakku Powerload","Tragstuhl Stoleruege"]},
+{name:"191 Schublade 1",sub:["Brechbeutel SicSac (5x)","Nierenschale (5x)","Tiererschale (5x)","Transportanweisungen (5x)"]},
+{name:"194 Schublade 4",sub:["Abfallbehaelter","Basilo 30 Foam","Regenbezug","Vliestuch (20x)","Tasche Patienteneigentum (2x)","Urinalbeutel JohnnyWee (3x)"]},
+{name:"195 Schrank Tragstuhl",sub:["Einmaldecke (5-10x)","Einmalhandschuhe (5-10x)","FFP2 Masken (6x)","Mund-Nasenschutz (4x)","Infektionsschutzkittel (3x)"]}
+]},
+heck:{label:"Heck",x:66,y:15,w:32,h:70,items:[
+{name:"420 Fahrerkabine schw. Tasche",sub:["Vorsichtungsrucksack schwarz"]},
+"500 Vorsichtungsrucksack Siegel OK"
+]}
+},
+equipment:[
+{id:"rucksackKTW",label:"KTW-Rucksack",color:"#16a34a",icon:"\uD83C\uDF92",items:[
+{name:"Hauptfach Mitte links",sub:["Blutdruckmanschette","Pupillenleuchte","Stethoskop Erwachsene"]},
+{name:"Hauptfach Mitte rechts",sub:["Dreiecktuch","Kaelte-Kompresse","SAM SPLINT gerollt"]},
+{name:"Hauptfach Unten",sub:["Jonosteril 500ml","Infusionssystem","Brechbeutel SicSac","Kleiderschere Robin","Modultasche gelb"]},
+{name:"Modultasche blau",sub:["Gaensegurgel","Guedeltubus 1-4","Magillzange"]},
+{name:"Modultasche gelb",sub:["FFP2 Masken (3x)","Mund-Nasenschutz (3x)","Schutzbrille (2x)"]},
+{name:"Modultasche gruen",sub:["Einmalhandschuhe XL (6x)","Kleiderschere","Mullbinde 6cm (2x)","Mullkompressen (3x)","Pflaster","Rettungsdecke","Saugkompresse","Verbandpaeckchen (4x)","Verbandtuch 40x60cm"]},
+{name:"Modultasche rot",sub:["Cutasept F 250ml","Kanuelenabwurf (2x)","Kanuelenfixierpflaster","Leukosilk 2,50cm","Monovetten-Set","Staubinde","VVK 14G/18G/20G/22G (je 2x)","Zellstofftupfer (10-20x)"]}
+]},
+{id:"vorsichtungKTW",label:"Vorsichtungsrucksack",color:"#dc2626",icon:"\uD83D\uDFE5",items:[
+{name:"501 Hauptfach",sub:["Aufkleber (2x)","Flatterband rot/weiss","Flatterband schwarz/weiss","Patientenanhaengekarten (25x)","Schreibbretter","Vorsichtungsalgorithmus ALRD-Bayern","Vorsichtungsweste rot"]},
+{name:"502 Modultasche blau",sub:["Wendl-Tubus 16 Ch (3x)","Wendl-Tubus 28 Ch (6x)"]},
+{name:"504 Modultasche orange",sub:["Verbandpaeckchen gross (5x)"]},
+{name:"505 Modultasche rot",sub:["Tourniquet C-A-T (4x)"]},
+{name:"506 Maeppchen rot",sub:["Bleistift 8B (2x)","Folienstift","Permanent-Marker","Radiergummi","Spitzer"]}
+]}
+]
+}
+};
+
+// ENGINE
+var chk={},aV="RTW",aZ=null,aI=null,SK="fzcheck_v5",isEq=false;
+function bE(){var s={};for(var vk in V){s[vk]={fz:{},eq:{}};var v=V[vk];for(var zk in v.fzZones){s[vk].fz[zk]=mkA(v.fzZones[zk].items);}if(v.equipment)for(var i=0;i<v.equipment.length;i++){var e=v.equipment[i];s[vk].eq[e.id]=mkA(e.items);}}return s;}
+function mkA(items){var a=[];for(var i=0;i<items.length;i++){var it=items[i];if(typeof it==="string")a.push({d:false});else a.push({d:false,s:it.sub.map(function(){return false;})});}return a;}
+function ld(){try{var r=localStorage.getItem(SK);if(r)chk=JSON.parse(r);else chk=bE();for(var vk in V)if(!chk[vk]){chk=bE();break;}}catch(e){chk=bE();}}
+function sv(){try{localStorage.setItem(SK,JSON.stringify(chk));var t=document.getElementById("tt");t.classList.add("sh");clearTimeout(window._t);window._t=setTimeout(function(){t.classList.remove("sh");},600);}catch(e){}}
+ld();
+function gC(vk,type,key){var cs=type==="fz"?chk[vk].fz[key]:chk[vk].eq[key];var items=type==="fz"?V[vk].fzZones[key].items:V[vk].equipment.find(function(e){return e.id===key;}).items;var d=0,t=0;for(var i=0;i<items.length;i++){var it=items[i];if(typeof it==="string"){t++;if(cs[i]&&cs[i].d)d++;}else{for(var j=0;j<it.sub.length;j++){t++;if(cs[i]&&cs[i].s&&cs[i].s[j])d++;}}}return{d:d,t:t};}
+function vTC(vk){var d=0,t=0;for(var zk in V[vk].fzZones){var p=gC(vk,"fz",zk);d+=p.d;t+=p.t;}if(V[vk].equipment)for(var i=0;i<V[vk].equipment.length;i++){var p2=gC(vk,"eq",V[vk].equipment[i].id);d+=p2.d;t+=p2.t;}return{d:d,t:t};}
+function sD(cs,items,i){var it=items[i];if(typeof it==="string")return cs[i].d;var s=cs[i].s;for(var j=0;j<s.length;j++)if(!s[j])return false;return true;}
+function sCC(cs,i){var s=cs[i].s||[],d=0;for(var j=0;j<s.length;j++)if(s[j])d++;return{d:d,t:s.length};}
+
+function render(){
+var v=V[aV],C=v.color;
+// Tabs
+var h="";for(var k in V){var vd=V[k],act=k===aV,p=vTC(k),pct=p.t?Math.round(p.d/p.t*100):0;
+h+='<button class="tab'+(act?' a':'')+'" style="'+(act?'background:'+vd.color+';border-color:'+vd.color+';color:#fff':'')+'" onclick="sw(\''+k+'\')"><div>'+k+'</div><div class="tp">'+pct+'%</div></button>';}
+document.getElementById("tabs").innerHTML=h;
+var vp=vTC(aV),vpct=vp.t?Math.round(vp.d/vp.t*100):0;
+document.getElementById("pF").style.width=vpct+"%";
+document.getElementById("pF").style.background=vpct===100?"#16a34a":C;
+document.getElementById("pT").textContent=vp.d+"/"+vp.t;
+document.getElementById("pT").style.color=vpct===100?"#16a34a":C;
+
+// Main area: vehicle schematic + equipment
+var m='<div class="lbl">\uD83D\uDE91 Fahrzeug</div><div class="vs" style="padding-bottom:55%;position:relative;border-color:'+C+'33">';
+// Simple SVG vehicle shape
+m+='<svg viewBox="0 0 100 55" style="position:absolute;top:0;left:0;width:100%;height:100%"><rect x="2" y="2" width="96" height="51" rx="6" fill="'+C+'" fill-opacity="0.04" stroke="'+C+'" stroke-width="0.5" stroke-opacity="0.2"/>';
+m+='<text x="50" y="52" text-anchor="middle" fill="'+C+'" fill-opacity="0.15" font-size="3" font-family="sans-serif">\u25c0 Fahrtrichtung</text></svg>';
+
+// Zone buttons
+for(var zk in v.fzZones){var z=v.fzZones[zk],p=gC(aV,"fz",zk),dn=p.t>0&&p.d===p.t,ac=aZ===zk&&!isEq;
+var bg=dn?"#16a34a":ac?C:"#fff",fg=(dn||ac)?"#fff":C,bd=dn?"#15803d":ac?C:C+"66";
+m+='<button class="zb" onclick="cZ(\''+zk+'\',false)" style="left:'+z.x+'%;top:'+z.y+'%;width:'+z.w+'%;height:'+z.h+'%;background:'+bg+';border-color:'+bd+';color:'+fg+'">'+z.label.replace(/\n/g,'<br>')+'<br><span style="font-size:6px;opacity:0.8">'+p.d+'/'+p.t+(dn?' \u2713':'')+'</span></button>';}
+m+='</div>';
+
+// Equipment below
+if(v.equipment&&v.equipment.length>0){
+m+='<div class="lbl">\uD83C\uDF92 Rucks\u00e4cke & Koffer</div><div class="eg">';
+for(var i=0;i<v.equipment.length;i++){var e=v.equipment[i],p=gC(aV,"eq",e.id),dn=p.t>0&&p.d===p.t,ac=aZ===e.id&&isEq;
+var bg=dn?"#16a34a":ac?e.color:"#fff",fg=(dn||ac)?"#fff":e.color,bd=dn?"#15803d":ac?e.color:e.color+"66";
+m+='<button class="eb" onclick="cZ(\''+e.id+'\',true)" style="background:'+bg+';border-color:'+bd+';color:'+fg+'"><div class="en">'+e.icon+' '+e.label+'</div><div class="ec">'+p.d+'/'+p.t+(dn?' \u2713':'')+'</div></button>';}
+m+='</div>';}
+document.getElementById("main").innerHTML=m;
+
+// Panel
+if(!aZ){document.getElementById("pnl").innerHTML='<div class="ht">\u2191 W\u00e4hle einen Bereich</div>';return;}
+var items,cs,title,pc;
+if(isEq){var eq=V[aV].equipment.find(function(e){return e.id===aZ;});items=eq.items;cs=chk[aV].eq[aZ];title=eq.label;pc=eq.color;}
+else{items=V[aV].fzZones[aZ].items;cs=chk[aV].fz[aZ];title=V[aV].fzZones[aZ].label.replace(/\n/g,' ');pc=C;}
+
+var ph='<div class="pnl" style="border:2px solid '+pc+'22"><div class="pnt" style="color:'+pc+'">'+title+'</div>';
+for(var i=0;i<items.length;i++){var it=items[i],hasSub=typeof it!=="string",name=hasSub?it.name:it,isDn=hasSub?sD(cs,items,i):cs[i].d,isX=aI===i&&hasSub;
+if(hasSub){var sc=sCC(cs,i);
+ph+='<button class="ir'+(isDn?' d':'')+(isX?' x':'')+'" onclick="cI('+i+')"><span class="cb'+(isDn?' d':'')+'">'+( isDn?'\u2713':'')+'</span><span class="nm'+(isDn?' s':'')+'">'+name+'</span><span class="bg">'+sc.d+'/'+sc.t+'</span><span class="aw'+(isX?' o':'')+'">\u25b8</span></button>';
+if(isX){ph+='<div class="sl">';for(var j=0;j<it.sub.length;j++){var sd=cs[i].s[j];
+ph+='<button class="sr'+(sd?' d':'')+'" onclick="tS('+i+','+j+')"><span class="sc'+(sd?' d':'')+'">'+( sd?'\u2713':'')+'</span><span class="sn'+(sd?' s':'')+'">'+it.sub[j]+'</span></button>';}ph+='</div>';}}
+else{ph+='<button class="ir'+(isDn?' d':'')+'" onclick="tI('+i+')"><span class="cb'+(isDn?' d':'')+'">'+( isDn?'\u2713':'')+'</span><span class="nm'+(isDn?' s':'')+'">'+name+'</span></button>';}}
+ph+='</div>';document.getElementById("pnl").innerHTML=ph;
+}
+
+function sw(k){aV=k;aZ=null;aI=null;isEq=false;sv();render();}
+function cZ(zk,eq){if(aZ===zk&&isEq===eq){aZ=null;}else{aZ=zk;isEq=eq;}aI=null;render();if(aZ)setTimeout(function(){document.getElementById("pnl").scrollIntoView({behavior:"smooth",block:"start"});},50);}
+function cI(i){aI=aI===i?null:i;render();}
+function tI(i){var cs=isEq?chk[aV].eq[aZ]:chk[aV].fz[aZ];cs[i].d=!cs[i].d;sv();render();}
+function tS(i,j){var cs=isEq?chk[aV].eq[aZ]:chk[aV].fz[aZ];cs[i].s[j]=!cs[i].s[j];sv();render();}
+function doR(){if(!confirm("Alle Haekchen fuer "+aV+" zuruecksetzen?"))return;var v=V[aV];for(var zk in v.fzZones)chk[aV].fz[zk]=mkA(v.fzZones[zk].items);if(v.equipment)for(var i=0;i<v.equipment.length;i++)chk[aV].eq[v.equipment[i].id]=mkA(v.equipment[i].items);aZ=null;aI=null;isEq=false;sv();render();}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+render();
+</script>
+</body>
+</html>
